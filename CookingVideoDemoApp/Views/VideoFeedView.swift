@@ -14,7 +14,7 @@ import SwiftUI
 /// - Tracks current page for player lifecycle
 /// - Enforces maximum of 2 AVPlayers in memory (handled by VideoPageView lifecycle)
 /// - Auto-play active page, cleanup inactive pages
-/// - Navigation to ingredients sheet and recipe detail
+/// - Navigation to recipe detail
 struct VideoFeedView: View {
     
     // MARK: - Properties
@@ -24,9 +24,6 @@ struct VideoFeedView: View {
     
     /// Current visible page index (for player lifecycle management)
     @State private var currentPageIndex: Int = 0
-    
-    /// Track if ingredients sheet is shown
-    @State private var showingIngredientsForRecipe: Recipe?
     
     /// Track if recipe detail is shown
     @State private var showingDetailForRecipe: Recipe?
@@ -49,12 +46,6 @@ struct VideoFeedView: View {
             .ignoresSafeArea()
             .task {
                 await viewModel.loadRecipes()
-            }
-            // Ingredients sheet overlay (video continues playing underneath)
-            .overlay {
-                if let recipe = showingIngredientsForRecipe {
-                    ingredientsSheetOverlay(for: recipe)
-                }
             }
             // Recipe detail navigation
             .navigationDestination(item: $showingDetailForRecipe) { recipe in
@@ -81,11 +72,6 @@ struct VideoFeedView: View {
                         onToggleBookmark: {
                             savedRecipesStore.toggleSaved(recipe.id)
                         },
-                        onSeeIngredients: {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                                showingIngredientsForRecipe = recipe
-                            }
-                        },
                         onGoToRecipe: {
                             showingDetailForRecipe = recipe
                         }
@@ -100,117 +86,6 @@ struct VideoFeedView: View {
         }
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)
-    }
-    
-    // MARK: - Ingredients Sheet Overlay
-    
-    /// Custom floating sheet that doesn't pause video playback
-    @ViewBuilder
-    private func ingredientsSheetOverlay(for recipe: Recipe) -> some View {
-        ZStack {
-            // Background dimming (dismiss on tap)
-            Color.black.opacity(0.3)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                        showingIngredientsForRecipe = nil
-                    }
-                }
-            
-            // Sheet content
-            VStack(spacing: 0) {
-                Spacer()
-                
-                VStack(spacing: 20) {
-                    // Handle bar
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.white.opacity(0.3))
-                        .frame(width: 40, height: 5)
-                        .padding(.top, 12)
-                    
-                    // Title
-                    Text("Ingredients")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                    
-                    // Ingredients list
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
-                            ForEach(recipe.ingredients, id: \.self) { ingredient in
-                                HStack(spacing: 12) {
-                                    Circle()
-                                        .fill(Color.white.opacity(0.3))
-                                        .frame(width: 6, height: 6)
-                                    
-                                    Text(ingredient)
-                                        .font(.body)
-                                        .foregroundStyle(.white)
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    .frame(maxHeight: 300)
-                    
-                    // Buttons
-                    HStack(spacing: 12) {
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                                showingIngredientsForRecipe = nil
-                            }
-                        } label: {
-                            Text("Hide ingredients")
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(Color.white.opacity(0.2))
-                                .clipShape(Capsule())
-                        }
-                        
-                        Button {
-                            showingDetailForRecipe = recipe
-                            showingIngredientsForRecipe = nil
-                        } label: {
-                            HStack(spacing: 6) {
-                                Text("Go to recipe")
-                                Image(systemName: "arrow.right")
-                            }
-                            .font(.headline)
-                            .foregroundStyle(.black)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(Color.white)
-                            .clipShape(Capsule())
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 30)
-                }
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(.ultraThinMaterial)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(
-                                    LinearGradient(
-                                        colors: [
-                                            Color.black.opacity(0.3),
-                                            Color.black.opacity(0.5)
-                                        ],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                        }
-                )
-                .padding(.horizontal, 20)
-            }
-        }
-        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
     
     // MARK: - Loading View

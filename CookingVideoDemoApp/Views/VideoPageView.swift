@@ -17,7 +17,7 @@ import AVFoundation
 /// - Tap to play/pause
 /// - Mute/unmute button
 /// - Play icon overlay when paused
-/// - Bottom metadata card
+/// - Bottom metadata card with ingredients toggle
 /// - Error handling with retry
 ///
 /// Lifecycle:
@@ -32,7 +32,6 @@ struct VideoPageView: View {
     let recipe: Recipe
     let isSaved: Bool
     let onToggleBookmark: () -> Void
-    let onSeeIngredients: () -> Void
     let onGoToRecipe: () -> Void
     
     /// Player view model (created once per page)
@@ -43,6 +42,9 @@ struct VideoPageView: View {
 
     /// Track whether the player was playing before going to background
     @State private var wasPlayingBeforeBackground = false
+    
+    /// Track if ingredients are showing (replaces metadata card)
+    @State private var showingIngredients = false
     
     /// Transient HUD for play/pause feedback
     @State private var showPlaybackHUD = false
@@ -77,10 +79,23 @@ struct VideoPageView: View {
                 controlsOverlay(viewModel: viewModel)
             }
             
-            // Bottom metadata card
+            // Bottom card (metadata or ingredients)
             VStack {
                 Spacer()
-                metadataCard
+                
+                if showingIngredients {
+                    ingredientsCard
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .bottom).combined(with: .opacity),
+                            removal: .move(edge: .bottom).combined(with: .opacity)
+                        ))
+                } else {
+                    metadataCard
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .bottom).combined(with: .opacity),
+                            removal: .move(edge: .bottom).combined(with: .opacity)
+                        ))
+                }
             }
         }
         .onAppear {
@@ -125,7 +140,7 @@ struct VideoPageView: View {
             }
             
             // Video player
-            if let viewModel = playerViewModel{
+            if let viewModel = playerViewModel {
                 PlayerView(viewModel: viewModel)
                     .opacity(viewModel.isVideoReady ? 1 : 0)
                     .animation(.easeIn(duration: 0.3), value: viewModel.isVideoReady)
@@ -248,7 +263,7 @@ struct VideoPageView: View {
     // MARK: - Metadata Card
     
     private var metadataCard: some View {
-        VStack {
+        VStack(spacing: 0) {
             HStack(alignment: .top, spacing: 16) {
                 // Thumbnail
                 AsyncImage(url: recipe.thumbnailURL) { image in
@@ -273,12 +288,12 @@ struct VideoPageView: View {
                     
                     HStack(spacing: 12) {
                         Label("\(recipe.rating, specifier: "%.1f")", systemImage: "star.fill")
+                        Text("(\(formatReviewCount(recipe.reviewCount)))")
+                        Text("•")
                         Label("\(recipe.cookTimeMinutes) min", systemImage: "clock")
                     }
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.9))
-                    
-                    // Action buttons
                 }
                 
                 Spacer()
@@ -295,16 +310,22 @@ struct VideoPageView: View {
                         .clipShape(Circle())
                 }
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            
+            // Action buttons
             HStack(spacing: 12) {
                 Button {
-                    onSeeIngredients()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                        showingIngredients = true
+                    }
                 } label: {
                     Text("See ingredients")
-                        .font(.caption)
+                        .font(.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
                         .background(Color.white.opacity(0.2))
                         .clipShape(Capsule())
                 }
@@ -316,18 +337,87 @@ struct VideoPageView: View {
                         Text("Go to recipe")
                         Image(systemName: "arrow.right")
                     }
-                    .font(.caption)
+                    .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.2))
+                    .clipShape(Capsule())
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 24)
+        }
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .opacity(0.5)
+        )
+        .containerRelativeFrame(.horizontal)
+    }
+    
+    // MARK: - Ingredients Card
+    
+    private var ingredientsCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Title
+            Text("Ingredients")
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundStyle(.white)
+            
+            // Ingredients list (simple, no bullets like NYT)
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(recipe.ingredients, id: \.self) { ingredient in
+                    Text(ingredient)
+                        .font(.body)
+                        .foregroundStyle(.white)
+                }
+            }
+            
+            // Action buttons
+            HStack(spacing: 12) {
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                        showingIngredients = false
+                    }
+                } label: {
+                    Text("Hide ingredients")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.white.opacity(0.2))
+                        .clipShape(Capsule())
+                }
+                
+                Button {
+                    onGoToRecipe()
+                } label: {
+                    HStack(spacing: 4) {
+                        Text("Go to recipe")
+                        Image(systemName: "arrow.right")
+                    }
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
                     .background(Color.white.opacity(0.2))
                     .clipShape(Capsule())
                 }
             }
         }
         .padding(16)
-        .padding(.bottom)
+        .padding(.bottom, 8)
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .opacity(0.5)
+        )
         .containerRelativeFrame(.horizontal)
     }
     
@@ -366,6 +456,17 @@ struct VideoPageView: View {
         .background(Color.black.opacity(0.7))
     }
     
+    // MARK: - Helper Methods
+    
+    /// Format review count (e.g., 1900 -> "1.9k")
+    private func formatReviewCount(_ count: Int) -> String {
+        if count >= 1000 {
+            let thousands = Double(count) / 1000.0
+            return String(format: "%.1fk", thousands)
+        }
+        return "\(count)"
+    }
+    
     // MARK: - Lifecycle Methods
     
     private func handleAppear() {
@@ -387,6 +488,9 @@ struct VideoPageView: View {
     private func handleDisappear() {
         print("🎬 VideoPageView disappeared: \(recipe.name)")
         isActive = false
+        
+        // Reset ingredients view
+        showingIngredients = false
         
         // Cleanup player immediately
         playerViewModel?.cleanup()
@@ -449,16 +553,14 @@ struct VideoPageView: View {
             cookTimeMinutes: 5,
             videoURLString: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
             thumbnailURLString: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b",
-            ingredients: ["Sugar", "Bitters", "Whiskey"],
+            ingredients: ["1 Sugar Cube", "2 dashes Angostura Bitters", "2 oz Rye Whiskey", "Orange Twist"],
             steps: ["Mix", "Stir", "Serve"],
             rating: 4.8,
-            reviewCount: 196,
+            reviewCount: 1965,
             yield: "1 Drink"
         ),
         isSaved: false,
         onToggleBookmark: {},
-        onSeeIngredients: {},
         onGoToRecipe: {}
     )
 }
-
