@@ -174,66 +174,7 @@ struct VideoPagePlaceholderView: View {
                 endPoint: .bottom
             )
             
-            // Overlay card at bottom
-            overlayCard
-                .containerRelativeFrame(.horizontal)
         }
-    }
-    
-    // MARK: - Overlay Card
-    
-    private var overlayCard: some View {
-        HStack(alignment: .top, spacing: 16) {
-            // Thumbnail
-            AsyncImage(url: recipe.thumbnailURL) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Color.gray
-            }
-            .frame(width: 80, height: 80)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            
-            // Info
-            VStack(alignment: .leading, spacing: 8) {
-                Text(recipe.name)
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                
-                Text(recipe.authorName)
-                    .font(.subheadline)
-                    .foregroundStyle(.white.opacity(0.8))
-                
-                HStack(spacing: 12) {
-                    Label("\(recipe.rating, specifier: "%.1f")", systemImage: "star.fill")
-                    Label("\(recipe.cookTimeMinutes) min", systemImage: "clock")
-                }
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.9))
-            }
-            
-            Spacer()
-            
-            // Bookmark button
-            Button {
-                onToggleBookmark()
-            } label: {
-                Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
-                    .font(.title2)
-                    .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
-                    .background(Color.white.opacity(0.2))
-                    .clipShape(Circle())
-            }
-        }
-        .padding(16)
-        .padding(.bottom)
-        .background(
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .opacity(0.5)
-        )
     }
 }
 
