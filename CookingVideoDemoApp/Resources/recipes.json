@@ -1,0 +1,47 @@
+[
+  {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "name": "Classic Old Fashioned",
+    "authorName": "Robert Simonson",
+    "cookTimeMinutes": 5,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "1 Sugar Cube",
+      "2 dashes Angostura Bitters",
+      "2 oz Rye Whiskey",
+      "Orange Twist"
+    ],
+    "steps": [
+      "Muddle sugar and bitters.",
+      "Add whiskey and ice.",
+      "Stir until chilled.",
+      "Garnish with orange twist."
+    ],
+    "rating": 4.8,
+    "reviewCount": 196,
+    "yield": "1 Drink"
+  },
+  {
+    "id": "123e4567-e89b-12d3-a456-426614174001",
+    "name": "Spicy Margarita",
+    "authorName": "Sam Sifton",
+    "cookTimeMinutes": 3,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1572635148818-ef6fd45eb394?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "2 oz Tequila",
+      "1 oz Lime Juice",
+      "0.5 oz Agave Syrup",
+      "Jalapeño slices"
+    ],
+    "steps": [
+        "Shake all ingredients with ice.",
+        "Strain into a rocks glass.",
+        "Garnish with Jalapeño."
+    ],
+    "rating": 4.5,
+    "reviewCount": 85,
+    "yield": "1 Drink"
+  }
+]
