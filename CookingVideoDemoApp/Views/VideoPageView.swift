@@ -40,6 +40,9 @@ struct VideoPageView: View {
     
     /// Track if this page is currently active
     @State private var isActive = false
+
+    /// Track whether the player was playing before going to background
+    @State private var wasPlayingBeforeBackground = false
     
     /// Scene phase for app lifecycle handling
     @Environment(\.scenePhase) private var scenePhase
@@ -366,18 +369,25 @@ struct VideoPageView: View {
         
         switch newPhase {
         case .background:
-            // Pause when app goes to background
-            print("📱 App backgrounded - pausing video")
+            // Pause when app goes to background, but remember prior playing state
+            wasPlayingBeforeBackground = playerViewModel?.isPlaying ?? false
+            print("📱 App backgrounded - pausing video (wasPlaying=\(wasPlayingBeforeBackground))")
             playerViewModel?.pause()
             
         case .inactive:
             // Pause during transitions (optional)
+            if oldPhase == .active { wasPlayingBeforeBackground = playerViewModel?.isPlaying ?? wasPlayingBeforeBackground }
             playerViewModel?.pause()
             
         case .active:
-            // When returning to foreground, remain paused
-            // User must explicitly tap to resume
-            print("📱 App foregrounded - video remains paused")
+            // On returning to foreground, resume only if it was playing before background
+            if wasPlayingBeforeBackground {
+                print("📱 App foregrounded - resuming video")
+                playerViewModel?.play(afterDelay: autoplayDebounce)
+            } else {
+                print("📱 App foregrounded - staying paused")
+                playerViewModel?.pause()
+            }
             
         @unknown default:
             break
@@ -422,3 +432,4 @@ struct VideoPageView: View {
         onGoToRecipe: {}
     )
 }
+
