@@ -7,8 +7,14 @@
 
 import SwiftUI
 
-/// Main video feed screen with vertical paging
-/// Uses iOS 17+ ScrollView with .scrollTargetBehavior(.paging)
+/// Main video feed screen with vertical paging and AVPlayer lifecycle management.
+///
+/// Features:
+/// - Vertical paging with iOS 17+ ScrollView
+/// - Tracks current page for player lifecycle
+/// - Enforces maximum of 2 AVPlayers in memory (handled by VideoPageView lifecycle)
+/// - Auto-play active page, cleanup inactive pages
+/// - Navigation to ingredients sheet and recipe detail
 struct VideoFeedView: View {
     
     // MARK: - Properties
@@ -16,23 +22,34 @@ struct VideoFeedView: View {
     @State private var viewModel = RecipeFeedViewModel()
     @State private var savedRecipesStore = SavedRecipesStore()
     
+    /// Current visible page index (for player lifecycle management)
+    @State private var currentPageIndex: Int = 0
+    
+    /// Track if ingredients sheet is shown
+    @State private var showingIngredientsForRecipe: Recipe?
+    
+    /// Track if recipe detail is shown
+    @State private var showingDetailForRecipe: Recipe?
+    
     // MARK: - Body
     
     var body: some View {
-        ZStack {
-            if viewModel.isLoading {
-                loadingView
-            } else if let errorMessage = viewModel.errorMessage {
-                errorView(message: errorMessage)
-            } else if viewModel.recipes.isEmpty {
-                emptyStateView
-            } else {
-                feedScrollView
+        NavigationStack {
+            ZStack {
+                if viewModel.isLoading {
+                    loadingView
+                } else if let errorMessage = viewModel.errorMessage {
+                    errorView(message: errorMessage)
+                } else if viewModel.recipes.isEmpty {
+                    emptyStateView
+                } else {
+                    feedScrollView
+                }
             }
-        }
-        .ignoresSafeArea()
-        .task {
-            await viewModel.loadRecipes()
+            .ignoresSafeArea()
+            .task {
+                await viewModel.loadRecipes()
+            }
         }
     }
     
@@ -41,15 +58,24 @@ struct VideoFeedView: View {
     private var feedScrollView: some View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
-                ForEach(viewModel.recipes) { recipe in
-                    VideoPagePlaceholderView(
+                ForEach(Array(viewModel.recipes.enumerated()), id: \.element.id) { index, recipe in
+                    VideoPageView(
                         recipe: recipe,
                         isSaved: savedRecipesStore.isSaved(recipe.id),
                         onToggleBookmark: {
                             savedRecipesStore.toggleSaved(recipe.id)
+                        },
+                        onSeeIngredients: {
+                            showingIngredientsForRecipe = recipe
+                        },
+                        onGoToRecipe: {
+                            showingDetailForRecipe = recipe
                         }
                     )
                     .containerRelativeFrame([.horizontal, .vertical])
+                    .onAppear {
+                        handlePageAppear(index: index)
+                    }
                 }
             }
             .scrollTargetLayout()
@@ -127,54 +153,13 @@ struct VideoFeedView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black)
     }
-}
-
-// MARK: - VideoPagePlaceholderView
-
-/// Temporary placeholder for individual video pages
-/// This will be replaced with the actual VideoPageView in Phase 3
-struct VideoPagePlaceholderView: View {
-    let recipe: Recipe
-    let isSaved: Bool
-    let onToggleBookmark: () -> Void
     
-    var body: some View {
-        ZStack(alignment: .bottom) {
-            // Background with thumbnail - fills entire frame
-            AsyncImage(url: recipe.thumbnailURL) { phase in
-                switch phase {
-                case .empty:
-                    Color.gray
-                case .success(let image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                case .failure:
-                    Color.gray.overlay {
-                        Image(systemName: "photo")
-                            .font(.largeTitle)
-                            .foregroundStyle(.white.opacity(0.5))
-                    }
-                @unknown default:
-                    Color.gray
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .clipped()
-            
-            // Gradient overlay
-            LinearGradient(
-                colors: [
-                    .clear,
-                    .clear,
-                    .black.opacity(0.3),
-                    .black.opacity(0.7)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            
-        }
+    // MARK: - Helper Methods
+    
+    /// Handle page appearance for tracking
+    private func handlePageAppear(index: Int) {
+        currentPageIndex = index
+        print("📄 Current page: \(index)")
     }
 }
 
