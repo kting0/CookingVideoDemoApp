@@ -50,6 +50,22 @@ struct VideoFeedView: View {
             .task {
                 await viewModel.loadRecipes()
             }
+            // Ingredients sheet overlay (video continues playing underneath)
+            .overlay {
+                if let recipe = showingIngredientsForRecipe {
+                    ingredientsSheetOverlay(for: recipe)
+                }
+            }
+            // Recipe detail navigation
+            .navigationDestination(item: $showingDetailForRecipe) { recipe in
+                RecipeDetailPlaceholderView(
+                    recipe: recipe,
+                    isSaved: savedRecipesStore.isSaved(recipe.id),
+                    onToggleBookmark: {
+                        savedRecipesStore.toggleSaved(recipe.id)
+                    }
+                )
+            }
         }
     }
     
@@ -66,7 +82,9 @@ struct VideoFeedView: View {
                             savedRecipesStore.toggleSaved(recipe.id)
                         },
                         onSeeIngredients: {
-                            showingIngredientsForRecipe = recipe
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                                showingIngredientsForRecipe = recipe
+                            }
                         },
                         onGoToRecipe: {
                             showingDetailForRecipe = recipe
@@ -82,6 +100,117 @@ struct VideoFeedView: View {
         }
         .scrollTargetBehavior(.paging)
         .scrollIndicators(.hidden)
+    }
+    
+    // MARK: - Ingredients Sheet Overlay
+    
+    /// Custom floating sheet that doesn't pause video playback
+    @ViewBuilder
+    private func ingredientsSheetOverlay(for recipe: Recipe) -> some View {
+        ZStack {
+            // Background dimming (dismiss on tap)
+            Color.black.opacity(0.3)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                        showingIngredientsForRecipe = nil
+                    }
+                }
+            
+            // Sheet content
+            VStack(spacing: 0) {
+                Spacer()
+                
+                VStack(spacing: 20) {
+                    // Handle bar
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.white.opacity(0.3))
+                        .frame(width: 40, height: 5)
+                        .padding(.top, 12)
+                    
+                    // Title
+                    Text("Ingredients")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                    
+                    // Ingredients list
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 12) {
+                            ForEach(recipe.ingredients, id: \.self) { ingredient in
+                                HStack(spacing: 12) {
+                                    Circle()
+                                        .fill(Color.white.opacity(0.3))
+                                        .frame(width: 6, height: 6)
+                                    
+                                    Text(ingredient)
+                                        .font(.body)
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    .frame(maxHeight: 300)
+                    
+                    // Buttons
+                    HStack(spacing: 12) {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                                showingIngredientsForRecipe = nil
+                            }
+                        } label: {
+                            Text("Hide ingredients")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .background(Color.white.opacity(0.2))
+                                .clipShape(Capsule())
+                        }
+                        
+                        Button {
+                            showingDetailForRecipe = recipe
+                            showingIngredientsForRecipe = nil
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text("Go to recipe")
+                                Image(systemName: "arrow.right")
+                            }
+                            .font(.headline)
+                            .foregroundStyle(.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color.white)
+                            .clipShape(Capsule())
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.ultraThinMaterial)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.black.opacity(0.3),
+                                            Color.black.opacity(0.5)
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                        }
+                )
+                .padding(.horizontal, 20)
+            }
+        }
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
     
     // MARK: - Loading View
@@ -160,6 +289,111 @@ struct VideoFeedView: View {
     private func handlePageAppear(index: Int) {
         currentPageIndex = index
         print("📄 Current page: \(index)")
+    }
+}
+
+// MARK: - RecipeDetailPlaceholderView
+
+/// Placeholder for Recipe Detail screen (Phase 4)
+/// Basic implementation until full detail screen is built
+struct RecipeDetailPlaceholderView: View {
+    let recipe: Recipe
+    let isSaved: Bool
+    let onToggleBookmark: () -> Void
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // Hero image
+                AsyncImage(url: recipe.thumbnailURL) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Color.gray
+                }
+                .frame(height: 300)
+                .clipped()
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    // Title and bookmark
+                    HStack {
+                        Text(recipe.name)
+                            .font(.title)
+                            .fontWeight(.bold)
+                        
+                        Spacer()
+                        
+                        Button {
+                            onToggleBookmark()
+                        } label: {
+                            Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
+                                .font(.title2)
+                                .foregroundStyle(.blue)
+                        }
+                    }
+                    
+                    // Metadata
+                    HStack(spacing: 20) {
+                        Label(recipe.authorName, systemImage: "person.fill")
+                        Label("\(recipe.rating, specifier: "%.1f")", systemImage: "star.fill")
+                        Label("\(recipe.cookTimeMinutes) min", systemImage: "clock")
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    
+                    Divider()
+                    
+                    // Ingredients section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Ingredients")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        Text(recipe.yield)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        
+                        ForEach(recipe.ingredients, id: \.self) { ingredient in
+                            HStack(spacing: 12) {
+                                Circle()
+                                    .fill(Color.blue)
+                                    .frame(width: 6, height: 6)
+                                
+                                Text(ingredient)
+                                    .font(.body)
+                            }
+                        }
+                    }
+                    
+                    Divider()
+                    
+                    // Steps section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Steps")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        
+                        ForEach(Array(recipe.steps.enumerated()), id: \.offset) { index, step in
+                            HStack(alignment: .top, spacing: 12) {
+                                Text("\(index + 1)")
+                                    .font(.headline)
+                                    .foregroundStyle(.white)
+                                    .frame(width: 28, height: 28)
+                                    .background(Color.blue)
+                                    .clipShape(Circle())
+                                
+                                Text(step)
+                                    .font(.body)
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 40)
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
