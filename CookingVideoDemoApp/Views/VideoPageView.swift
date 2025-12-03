@@ -44,6 +44,12 @@ struct VideoPageView: View {
     /// Track whether the player was playing before going to background
     @State private var wasPlayingBeforeBackground = false
     
+    /// Transient HUD for play/pause feedback
+    @State private var showPlaybackHUD = false
+    @State private var playbackHUDIcon: String = "pause.fill"
+    @State private var hudHideWorkItem: DispatchWorkItem?
+    private let playbackHUDDuration: TimeInterval = 0.9
+    
     /// Scene phase for app lifecycle handling
     @Environment(\.scenePhase) private var scenePhase
     
@@ -164,17 +170,27 @@ struct VideoPageView: View {
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture {
+                    // Toggle playback
                     viewModel.togglePlayPause()
+
+                    // Update HUD icon to reflect the resulting state
+                    playbackHUDIcon = viewModel.isPlaying ? "play.fill" : "pause.fill"
+
+                    // Show HUD with animation
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.85)) {
+                        showPlaybackHUD = true
+                    }
+
+                    // Debounced hide
+                    hudHideWorkItem?.cancel()
+                    let work = DispatchWorkItem {
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            showPlaybackHUD = false
+                        }
+                    }
+                    hudHideWorkItem = work
+                    DispatchQueue.main.asyncAfter(deadline: .now() + playbackHUDDuration, execute: work)
                 }
-            
-            // Play icon overlay when paused
-            if !viewModel.isPlaying && viewModel.isVideoReady {
-                Image(systemName: "play.circle.fill")
-                    .font(.system(size: 80))
-                    .foregroundStyle(.white.opacity(0.9))
-                    .shadow(radius: 10)
-                    .transition(.scale.combined(with: .opacity))
-            }
             
             // Top-right controls
             VStack {
@@ -211,6 +227,19 @@ struct VideoPageView: View {
                 }
                 
                 Spacer()
+            }
+            
+            // Transient playback HUD
+            if showPlaybackHUD && viewModel.isVideoReady {
+                Image(systemName: playbackHUDIcon)
+                    .font(.system(size: 80, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .shadow(radius: 10)
+                    .padding(24)
+                    .background(
+                        Circle().fill(Color.black.opacity(0.35))
+                    )
+                    .transition(.scale.combined(with: .opacity))
             }
         }
         .containerRelativeFrame(.horizontal)
