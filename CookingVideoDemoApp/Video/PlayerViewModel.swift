@@ -32,10 +32,16 @@ final class PlayerViewModel {
     /// Current playback state
     var isPlaying = false
     
-    /// Mute state - starts muted per iOS best practices
-    var isMuted = true {
+    /// Mute state persisted in UserDefaults. Default is sound ON (not muted).
+    var isMuted: Bool = UserDefaults.standard.object(forKey: "player_isMuted") as? Bool ?? false {
         didSet {
+            // Persist to UserDefaults so the choice carries over to next videos
+            UserDefaults.standard.set(isMuted, forKey: "player_isMuted")
+            
+            // Apply to the underlying player immediately
             player?.isMuted = isMuted
+            
+            // Update audio session based on new state
             updateAudioSession()
         }
     }
@@ -76,6 +82,9 @@ final class PlayerViewModel {
     init(videoURL: URL) {
         self.videoURL = videoURL
         print("🎬 PlayerViewModel init for: \(videoURL.lastPathComponent)")
+        
+        // Ensure isMuted reflects persisted preference (default = sound on)
+        self.isMuted = UserDefaults.standard.object(forKey: "player_isMuted") as? Bool ?? false
     }
     
     nonisolated deinit {
