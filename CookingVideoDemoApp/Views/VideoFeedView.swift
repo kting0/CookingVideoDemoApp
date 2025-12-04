@@ -49,12 +49,12 @@ struct VideoFeedView: View {
             }
             // Recipe detail navigation
             .navigationDestination(item: $showingDetailForRecipe) { recipe in
-                RecipeDetailPlaceholderView(
+                RecipeDetailView(
                     recipe: recipe,
-                    isSaved: savedRecipesStore.isSaved(recipe.id),
-                    onToggleBookmark: {
-                        savedRecipesStore.toggleSaved(recipe.id)
-                    }
+                    isSaved: Binding(
+                        get: { savedRecipesStore.isSaved(recipe.id) },
+                        set: { _ in savedRecipesStore.toggleSaved(recipe.id) }
+                    )
                 )
             }
         }
@@ -164,111 +164,6 @@ struct VideoFeedView: View {
     private func handlePageAppear(index: Int) {
         currentPageIndex = index
         print("📄 Current page: \(index)")
-    }
-}
-
-// MARK: - RecipeDetailPlaceholderView
-
-/// Placeholder for Recipe Detail screen (Phase 4)
-/// Basic implementation until full detail screen is built
-struct RecipeDetailPlaceholderView: View {
-    let recipe: Recipe
-    let isSaved: Bool
-    let onToggleBookmark: () -> Void
-    
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // Hero image
-                AsyncImage(url: recipe.thumbnailURL) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    Color.gray
-                }
-                .frame(height: 300)
-                .clipped()
-                
-                VStack(alignment: .leading, spacing: 16) {
-                    // Title and bookmark
-                    HStack {
-                        Text(recipe.name)
-                            .font(.title)
-                            .fontWeight(.bold)
-                        
-                        Spacer()
-                        
-                        Button {
-                            onToggleBookmark()
-                        } label: {
-                            Image(systemName: isSaved ? "bookmark.fill" : "bookmark")
-                                .font(.title2)
-                                .foregroundStyle(.blue)
-                        }
-                    }
-                    
-                    // Metadata
-                    HStack(spacing: 20) {
-                        Label(recipe.authorName, systemImage: "person.fill")
-                        Label("\(recipe.rating, specifier: "%.1f")", systemImage: "star.fill")
-                        Label("\(recipe.cookTimeMinutes) min", systemImage: "clock")
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    
-                    Divider()
-                    
-                    // Ingredients section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Ingredients")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        
-                        Text(recipe.yield)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        
-                        ForEach(recipe.ingredients, id: \.self) { ingredient in
-                            HStack(spacing: 12) {
-                                Circle()
-                                    .fill(Color.blue)
-                                    .frame(width: 6, height: 6)
-                                
-                                Text(ingredient)
-                                    .font(.body)
-                            }
-                        }
-                    }
-                    
-                    Divider()
-                    
-                    // Steps section
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Steps")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        
-                        ForEach(Array(recipe.steps.enumerated()), id: \.offset) { index, step in
-                            HStack(alignment: .top, spacing: 12) {
-                                Text("\(index + 1)")
-                                    .font(.headline)
-                                    .foregroundStyle(.white)
-                                    .frame(width: 28, height: 28)
-                                    .background(Color.blue)
-                                    .clipShape(Circle())
-                                
-                                Text(step)
-                                    .font(.body)
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 40)
-            }
-        }
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
