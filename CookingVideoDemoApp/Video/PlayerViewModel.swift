@@ -263,12 +263,23 @@ final class PlayerViewModel {
     
     /// Handle video reaching the end
     private func handleVideoEnd() {
-        print("🏁 Video ended: \(videoURL.lastPathComponent)")
-        isPlaying = false
+        print("🏁 Video ended: \(videoURL.lastPathComponent) — auto-restarting")
+        // Ensure we have a valid player
+        guard let player = player else { return }
+        
+        // Stop monitoring while we reset
         stopMonitoringPlayback()
         
-        // Optional: Auto-replay or show replay button
-        // For now, just stop
+        // Seek back to the beginning without tolerance for a clean loop
+        player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] _ in
+            guard let self = self, !self.isCleanedUp else { return }
+            // Immediately resume playback to create a loop
+            self.updateAudioSession()
+            player.play()
+            self.isPlaying = true
+            self.startMonitoringPlayback()
+            print("🔁 Restarted playback from beginning")
+        }
     }
     
     /// Monitor playback to detect stalls
