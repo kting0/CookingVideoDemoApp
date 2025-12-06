@@ -30,18 +30,27 @@ struct VideoPageView: View {
     // MARK: - Properties
     
     let recipe: Recipe
+    let playerViewModel: PlayerViewModel
     let isSaved: Bool
     let onToggleBookmark: () -> Void
     let onGoToRecipe: () -> Void
-    
-    /// Player view model (created once per page)
-    @State private var playerViewModel: PlayerViewModel?
+    let onBecomeActive: () -> Void
     
     /// Track if this page is currently active
     @State private var isActive = false
 
     /// Track whether the player was playing before going to background
     @State private var wasPlayingBeforeBackground = false
+
+    /// Track whether the player was playing before the view disappeared (e.g., during feed paging)
+    @State private var wasPlayingBeforeDeactivation = false
+
+    /// Track whether we should resume after returning from recipe detail
+    @State private var shouldResumeAfterNavigation = false
+    @State private var isNavigatingToRecipe = false
+
+    /// Only auto-play the very first time this page appears
+    @State private var shouldAutoplayOnFirstAppear = true
     
     /// Track if ingredients are showing (replaces metadata card)
     @State private var showingIngredients = false
@@ -75,9 +84,7 @@ struct VideoPageView: View {
                 .ignoresSafeArea()
             
             // Controls overlay
-            if let viewModel = playerViewModel {
-                controlsOverlay(viewModel: viewModel)
-            }
+            controlsOverlay(viewModel: playerViewModel)
             
             // Bottom card (metadata or ingredients)
             VStack {
@@ -135,26 +142,24 @@ struct VideoPageView: View {
                         Color.gray
                     }
                 }
-                .opacity(playerViewModel?.isVideoReady == true ? 0 : 1)
-                .animation(.easeIn(duration: 0.3), value: playerViewModel?.isVideoReady)
+                .opacity(playerViewModel.isVideoReady ? 0 : 1)
+                .animation(.easeIn(duration: 0.3), value: playerViewModel.isVideoReady)
             }
             
             // Video player
-            if let viewModel = playerViewModel {
-                PlayerView(viewModel: viewModel)
-                    .opacity(viewModel.isVideoReady ? 1 : 0)
-                    .animation(.easeIn(duration: 0.3), value: viewModel.isVideoReady)
-            }
+            PlayerView(viewModel: playerViewModel)
+                .opacity(playerViewModel.isVideoReady ? 1 : 0)
+                .animation(.easeIn(duration: 0.3), value: playerViewModel.isVideoReady)
             
             // Loading indicator
-            if playerViewModel?.isLoading == true && playerViewModel?.errorMessage == nil {
+            if playerViewModel.isLoading && playerViewModel.errorMessage == nil {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .scaleEffect(1.5)
             }
-            
+
             // Error state
-            if let errorMessage = playerViewModel?.errorMessage {
+            if let errorMessage = playerViewModel.errorMessage {
                 errorOverlay(message: errorMessage)
             }
         }
@@ -329,8 +334,11 @@ struct VideoPageView: View {
                         .background(Color.white.opacity(0.2))
                         .clipShape(Capsule())
                 }
-                
+
                 Button {
+                    shouldResumeAfterNavigation = playerViewModel.isPlaying
+                    isNavigatingToRecipe = true
+                    playerViewModel.pause()
                     onGoToRecipe()
                 } label: {
                     HStack(spacing: 4) {
@@ -472,29 +480,40 @@ struct VideoPageView: View {
     private func handleAppear() {
         print("🎬 VideoPageView appeared: \(recipe.name)")
         isActive = true
-        
-        // Create player view model if needed
-        if playerViewModel == nil, let videoURL = recipe.videoURL {
-            playerViewModel = PlayerViewModel(videoURL: videoURL)
-        }
-        
+
+        onBecomeActive()
+
         // Setup player
-        playerViewModel?.setupPlayer()
-        
-        // Auto-play with debounce
-        playerViewModel?.play(afterDelay: autoplayDebounce)
+        playerViewModel.setupPlayer()
+
+        // Auto-play with debounce unless we're resuming from recipe detail or the user paused manually
+        if shouldResumeAfterNavigation {
+            playerViewModel.play()
+            shouldResumeAfterNavigation = false
+        } else if wasPlayingBeforeDeactivation {
+            playerViewModel.play(afterDelay: autoplayDebounce)
+            wasPlayingBeforeDeactivation = false
+        } else if shouldAutoplayOnFirstAppear {
+            playerViewModel.play(afterDelay: autoplayDebounce)
+            shouldAutoplayOnFirstAppear = false
+        }
     }
-    
+
     private func handleDisappear() {
         print("🎬 VideoPageView disappeared: \(recipe.name)")
         isActive = false
-        
+
         // Reset ingredients view
         showingIngredients = false
-        
-        // Cleanup player immediately
-        playerViewModel?.cleanup()
-        playerViewModel = nil
+
+        wasPlayingBeforeDeactivation = shouldResumeAfterNavigation || playerViewModel.isPlaying
+
+        // Pause playback but keep the player alive so state is preserved
+        if !isNavigatingToRecipe {
+            playerViewModel.pause()
+        }
+
+        isNavigatingToRecipe = false
     }
     
     private func handleScenePhaseChange(from oldPhase: ScenePhase, to newPhase: ScenePhase) {
@@ -503,23 +522,23 @@ struct VideoPageView: View {
         switch newPhase {
         case .background:
             // Pause when app goes to background, but remember prior playing state
-            wasPlayingBeforeBackground = playerViewModel?.isPlaying ?? false
+            wasPlayingBeforeBackground = playerViewModel.isPlaying
             print("📱 App backgrounded - pausing video (wasPlaying=\(wasPlayingBeforeBackground))")
-            playerViewModel?.pause()
-            
+            playerViewModel.pause()
+
         case .inactive:
             // Pause during transitions (optional)
-            if oldPhase == .active { wasPlayingBeforeBackground = playerViewModel?.isPlaying ?? wasPlayingBeforeBackground }
-            playerViewModel?.pause()
-            
+            if oldPhase == .active { wasPlayingBeforeBackground = playerViewModel.isPlaying }
+            playerViewModel.pause()
+
         case .active:
             // On returning to foreground, resume only if it was playing before background
             if wasPlayingBeforeBackground {
                 print("📱 App foregrounded - resuming video")
-                playerViewModel?.play(afterDelay: autoplayDebounce)
+                playerViewModel.play(afterDelay: autoplayDebounce)
             } else {
                 print("📱 App foregrounded - staying paused")
-                playerViewModel?.pause()
+                playerViewModel.pause()
             }
             
         @unknown default:
@@ -531,14 +550,11 @@ struct VideoPageView: View {
         print("🔄 Retrying video load for: \(recipe.name)")
         
         // Cleanup old player
-        playerViewModel?.cleanup()
+        playerViewModel.cleanup()
         
         // Create new player
-        if let videoURL = recipe.videoURL {
-            playerViewModel = PlayerViewModel(videoURL: videoURL)
-            playerViewModel?.setupPlayer()
-            playerViewModel?.play(afterDelay: autoplayDebounce)
-        }
+        playerViewModel.setupPlayer()
+        playerViewModel.play(afterDelay: autoplayDebounce)
     }
 }
 
@@ -559,8 +575,12 @@ struct VideoPageView: View {
             reviewCount: 1965,
             yield: "1 Drink"
         ),
+        playerViewModel: PlayerViewModel(
+            videoURL: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!
+        ),
         isSaved: false,
         onToggleBookmark: {},
-        onGoToRecipe: {}
+        onGoToRecipe: {},
+        onBecomeActive: {}
     )
 }

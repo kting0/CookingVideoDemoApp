@@ -21,6 +21,7 @@ struct VideoFeedView: View {
     
     @State private var viewModel = RecipeFeedViewModel()
     @State private var savedRecipesStore = SavedRecipesStore()
+    @State private var playerStore = VideoPlayerStore()
     
     /// Current visible page index (for player lifecycle management)
     @State private var currentPageIndex: Int = 0
@@ -45,7 +46,10 @@ struct VideoFeedView: View {
             }
             .ignoresSafeArea()
             .task {
-                await viewModel.loadRecipes()
+                // Only load once so the feed stays warm when returning from recipe detail
+                if viewModel.recipes.isEmpty {
+                    await viewModel.loadRecipes()
+                }
             }
             // Recipe detail navigation
             .navigationDestination(item: $showingDetailForRecipe) { recipe in
@@ -66,16 +70,22 @@ struct VideoFeedView: View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
                 ForEach(Array(viewModel.recipes.enumerated()), id: \.element.id) { index, recipe in
-                    VideoPageView(
-                        recipe: recipe,
-                        isSaved: savedRecipesStore.isSaved(recipe.id),
-                        onToggleBookmark: {
-                            savedRecipesStore.toggleSaved(recipe.id)
-                        },
-                        onGoToRecipe: {
-                            showingDetailForRecipe = recipe
-                        }
-                    )
+                    if let playerViewModel = playerStore.viewModel(for: recipe) {
+                        VideoPageView(
+                            recipe: recipe,
+                            playerViewModel: playerViewModel,
+                            isSaved: savedRecipesStore.isSaved(recipe.id),
+                            onToggleBookmark: {
+                                savedRecipesStore.toggleSaved(recipe.id)
+                            },
+                            onGoToRecipe: {
+                                showingDetailForRecipe = recipe
+                            },
+                            onBecomeActive: {
+                                playerStore.pauseAll(except: recipe.id)
+                            }
+                        )
+                    }
                     .containerRelativeFrame([.horizontal, .vertical])
                     .onAppear {
                         handlePageAppear(index: index)
