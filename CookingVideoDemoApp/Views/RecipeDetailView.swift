@@ -67,6 +67,16 @@ struct RecipeDetailView: View {
                     // Bookmark button
                     bookmarkButton
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                ShareLink(item: {
+                    var text = "\(recipe.name)\n\nIngredients:\n"
+                    text += recipe.ingredients.map { "• \($0)" }.joined(separator: "\n")
+                    return text
+                }()) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.title3)
+                }
+            }
         }
         .onAppear {
             // Capture whether the video was playing when the sheet opened
@@ -383,3 +393,4 @@ extension Notification.Name {
     static let recipeDetailPauseVideoRequested = Notification.Name("recipeDetailPauseVideoRequested")
     static let recipeDetailResumeVideoRequested = Notification.Name("recipeDetailResumeVideoRequested")
 }
+

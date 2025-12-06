@@ -236,9 +236,12 @@ struct VideoPageView: View {
                         }
                         
                         // Share button (stub)
-                        Button {
-                            // TODO: Implement share
-                        } label: {
+                        ShareLink(item: {
+                            // Compose share text: recipe title + ingredients
+                            var text = "\(recipe.name)\n\nIngredients:\n"
+                            text += recipe.ingredients.map { "• \($0)" }.joined(separator: "\n")
+                            return text
+                        }()) {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.title2)
                                 .foregroundStyle(.white)
