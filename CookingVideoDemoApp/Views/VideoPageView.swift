@@ -86,6 +86,11 @@ struct VideoPageView: View {
                 controlsOverlay(viewModel: viewModel)
             }
             
+            // Error state
+            if let errorMessage = playerViewModel?.errorMessage {
+                errorOverlay(message: errorMessage)
+            }
+            
             // Bottom card (metadata or ingredients)
             VStack {
                 Spacer()
@@ -161,11 +166,6 @@ struct VideoPageView: View {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
                     .scaleEffect(1.5)
-            }
-            
-            // Error state
-            if let errorMessage = playerViewModel?.errorMessage {
-                errorOverlay(message: errorMessage)
             }
         }
     }
