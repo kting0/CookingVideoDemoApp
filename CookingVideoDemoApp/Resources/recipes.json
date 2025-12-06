@@ -23,6 +23,347 @@
     "yield": "1 Drink"
   },
   {
+    "id": "223e4567-e89b-12d3-a456-426614174002",
+    "name": "Creamy Carbonara",
+    "authorName": "Melissa Clark",
+    "cookTimeMinutes": 25,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1612874742237-6526221588e3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "1 lb Spaghetti",
+      "6 oz Pancetta, diced",
+      "4 Large Eggs",
+      "1 cup Parmesan, grated",
+      "Black Pepper",
+      "Salt"
+    ],
+    "steps": [
+      "Cook spaghetti in salted boiling water.",
+      "Render pancetta in a large pan until crispy.",
+      "Whisk eggs and parmesan together.",
+      "Toss hot pasta with pancetta, then egg mixture off heat.",
+      "Season with pepper and serve immediately."
+    ],
+    "rating": 4.9,
+    "reviewCount": 342,
+    "yield": "4 Servings"
+  },
+  {
+    "id": "323e4567-e89b-12d3-a456-426614174003",
+    "name": "Greek Salad",
+    "authorName": "Yotam Ottolenghi",
+    "cookTimeMinutes": 15,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "4 Tomatoes, chopped",
+      "1 Cucumber, diced",
+      "1 Red Onion, sliced",
+      "1 cup Kalamata Olives",
+      "8 oz Feta Cheese",
+      "3 tbsp Olive Oil",
+      "1 tbsp Red Wine Vinegar",
+      "Oregano"
+    ],
+    "steps": [
+      "Combine tomatoes, cucumber, onion, and olives in a bowl.",
+      "Whisk olive oil, vinegar, and oregano.",
+      "Pour dressing over vegetables.",
+      "Top with crumbled feta and serve."
+    ],
+    "rating": 4.6,
+    "reviewCount": 128,
+    "yield": "4 Servings"
+  },
+  {
+    "id": "423e4567-e89b-12d3-a456-426614174004",
+    "name": "Chocolate Lava Cake",
+    "authorName": "Dorie Greenspan",
+    "cookTimeMinutes": 20,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1624353365286-3f8d62daad51?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "6 oz Dark Chocolate",
+      "1/2 cup Butter",
+      "2 Eggs",
+      "2 Egg Yolks",
+      "1/4 cup Sugar",
+      "2 tbsp Flour",
+      "Vanilla Extract"
+    ],
+    "steps": [
+      "Melt chocolate and butter together.",
+      "Whisk eggs, yolks, and sugar until thick.",
+      "Fold in melted chocolate and flour.",
+      "Pour into greased ramekins.",
+      "Bake at 425°F for 12 minutes.",
+      "Invert onto plates and serve warm."
+    ],
+    "rating": 4.9,
+    "reviewCount": 287,
+    "yield": "4 Cakes"
+  },
+  {
+    "id": "523e4567-e89b-12d3-a456-426614174005",
+    "name": "Thai Basil Chicken",
+    "authorName": "Andy Ricker",
+    "cookTimeMinutes": 30,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "1 lb Chicken Breast, sliced",
+      "3 cloves Garlic, minced",
+      "2 Thai Chilies, sliced",
+      "1 cup Thai Basil",
+      "2 tbsp Fish Sauce",
+      "1 tbsp Soy Sauce",
+      "1 tsp Sugar",
+      "Vegetable Oil"
+    ],
+    "steps": [
+      "Heat oil in a wok over high heat.",
+      "Add garlic and chilies, stir-fry 30 seconds.",
+      "Add chicken and cook until no longer pink.",
+      "Add fish sauce, soy sauce, and sugar.",
+      "Toss in Thai basil until wilted.",
+      "Serve over jasmine rice."
+    ],
+    "rating": 4.7,
+    "reviewCount": 214,
+    "yield": "3 Servings"
+  },
+  {
+    "id": "623e4567-e89b-12d3-a456-426614174006",
+    "name": "Sourdough Bread",
+    "authorName": "Chad Robertson",
+    "cookTimeMinutes": 45,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "1 cup Sourdough Starter",
+      "3 cups Bread Flour",
+      "1.5 cups Water",
+      "2 tsp Salt"
+    ],
+    "steps": [
+      "Mix starter, flour, and water. Rest 30 minutes.",
+      "Add salt and knead until smooth.",
+      "Bulk ferment 4-6 hours with folds every hour.",
+      "Shape into a boule and proof 2-4 hours.",
+      "Score the top and bake at 450°F for 45 minutes.",
+      "Cool completely before slicing."
+    ],
+    "rating": 4.8,
+    "reviewCount": 156,
+    "yield": "1 Loaf"
+  },
+  {
+    "id": "723e4567-e89b-12d3-a456-426614174007",
+    "name": "Miso Ramen",
+    "authorName": "Ivan Orkin",
+    "cookTimeMinutes": 35,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "4 cups Chicken Stock",
+      "3 tbsp Miso Paste",
+      "8 oz Ramen Noodles",
+      "2 Soft-Boiled Eggs",
+      "1 cup Spinach",
+      "Green Onions, sliced",
+      "Sesame Oil"
+    ],
+    "steps": [
+      "Bring stock to a simmer and whisk in miso.",
+      "Cook noodles according to package directions.",
+      "Divide noodles between bowls.",
+      "Ladle hot broth over noodles.",
+      "Top with egg halves, spinach, and green onions.",
+      "Drizzle with sesame oil."
+    ],
+    "rating": 4.8,
+    "reviewCount": 193,
+    "yield": "2 Servings"
+  },
+  {
+    "id": "823e4567-e89b-12d3-a456-426614174008",
+    "name": "Beef Tacos",
+    "authorName": "Rick Bayless",
+    "cookTimeMinutes": 25,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "1 lb Ground Beef",
+      "1 Onion, diced",
+      "2 cloves Garlic, minced",
+      "2 tsp Chili Powder",
+      "1 tsp Cumin",
+      "8 Corn Tortillas",
+      "Cilantro",
+      "Lime Wedges"
+    ],
+    "steps": [
+      "Brown beef with onion and garlic.",
+      "Add spices and cook 2 minutes.",
+      "Warm tortillas on a griddle.",
+      "Fill tortillas with beef mixture.",
+      "Top with cilantro and serve with lime."
+    ],
+    "rating": 4.6,
+    "reviewCount": 267,
+    "yield": "4 Servings"
+  },
+  {
+    "id": "923e4567-e89b-12d3-a456-426614174009",
+    "name": "Caprese Salad",
+    "authorName": "Ina Garten",
+    "cookTimeMinutes": 10,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1608897013039-887f21d8c804?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "4 Large Tomatoes, sliced",
+      "1 lb Fresh Mozzarella, sliced",
+      "Fresh Basil Leaves",
+      "Extra Virgin Olive Oil",
+      "Balsamic Glaze",
+      "Sea Salt",
+      "Black Pepper"
+    ],
+    "steps": [
+      "Arrange tomato and mozzarella slices alternating on a platter.",
+      "Tuck basil leaves between slices.",
+      "Drizzle with olive oil and balsamic glaze.",
+      "Season with salt and pepper.",
+      "Serve at room temperature."
+    ],
+    "rating": 4.7,
+    "reviewCount": 175,
+    "yield": "4 Servings"
+  },
+  {
+    "id": "a23e4567-e89b-12d3-a456-426614174010",
+    "name": "Pad Thai",
+    "authorName": "Pim Techamuanvivit",
+    "cookTimeMinutes": 30,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1559314809-0d155014e29e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "8 oz Rice Noodles",
+      "8 oz Shrimp, peeled",
+      "2 Eggs",
+      "3 tbsp Tamarind Paste",
+      "2 tbsp Fish Sauce",
+      "1 tbsp Sugar",
+      "Bean Sprouts",
+      "Peanuts, crushed",
+      "Lime Wedges"
+    ],
+    "steps": [
+      "Soak rice noodles in warm water 20 minutes.",
+      "Heat wok and scramble eggs, set aside.",
+      "Stir-fry shrimp until pink.",
+      "Add drained noodles, tamarind, fish sauce, sugar.",
+      "Toss until noodles are tender.",
+      "Add eggs and bean sprouts.",
+      "Serve topped with peanuts and lime."
+    ],
+    "rating": 4.9,
+    "reviewCount": 312,
+    "yield": "2 Servings"
+  },
+  {
+    "id": "b23e4567-e89b-12d3-a456-426614174011",
+    "name": "French Onion Soup",
+    "authorName": "Julia Child",
+    "cookTimeMinutes": 40,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1547592166-23ac45744acd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "4 Large Onions, sliced",
+      "4 tbsp Butter",
+      "6 cups Beef Stock",
+      "1 cup White Wine",
+      "Thyme",
+      "Bay Leaf",
+      "Baguette Slices",
+      "Gruyère Cheese, grated"
+    ],
+    "steps": [
+      "Caramelize onions in butter over medium-low heat, 30 minutes.",
+      "Add wine and reduce by half.",
+      "Add stock, thyme, and bay leaf. Simmer 20 minutes.",
+      "Toast baguette slices.",
+      "Ladle soup into oven-safe bowls.",
+      "Top with bread and cheese.",
+      "Broil until cheese is bubbly and golden."
+    ],
+    "rating": 4.8,
+    "reviewCount": 228,
+    "yield": "4 Servings"
+  },
+  {
+    "id": "c23e4567-e89b-12d3-a456-426614174012",
+    "name": "Shakshuka",
+    "authorName": "Sami Tamimi",
+    "cookTimeMinutes": 25,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1587486913049-53fc88980cfc?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "2 tbsp Olive Oil",
+      "1 Onion, diced",
+      "1 Red Pepper, diced",
+      "3 cloves Garlic, minced",
+      "1 can (28 oz) Crushed Tomatoes",
+      "1 tsp Cumin",
+      "1 tsp Paprika",
+      "6 Eggs",
+      "Feta Cheese",
+      "Parsley"
+    ],
+    "steps": [
+      "Sauté onion and pepper in olive oil until soft.",
+      "Add garlic and spices, cook 1 minute.",
+      "Add tomatoes and simmer 10 minutes.",
+      "Make wells in sauce and crack eggs into them.",
+      "Cover and cook until eggs are set.",
+      "Top with feta and parsley. Serve with crusty bread."
+    ],
+    "rating": 4.7,
+    "reviewCount": 189,
+    "yield": "3 Servings"
+  },
+  {
+    "id": "d23e4567-e89b-12d3-a456-426614174013",
+    "name": "Tiramisu",
+    "authorName": "Lidia Bastianich",
+    "cookTimeMinutes": 30,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "6 Egg Yolks",
+      "3/4 cup Sugar",
+      "1.5 cups Mascarpone",
+      "1.5 cups Heavy Cream, whipped",
+      "2 cups Strong Espresso, cooled",
+      "3 tbsp Marsala Wine",
+      "24 Ladyfinger Cookies",
+      "Cocoa Powder"
+    ],
+    "steps": [
+      "Whisk egg yolks and sugar over simmering water until thick.",
+      "Remove from heat and fold in mascarpone.",
+      "Fold in whipped cream.",
+      "Mix espresso and Marsala.",
+      "Dip ladyfingers in espresso mixture briefly.",
+      "Layer cookies and cream in a dish.",
+      "Refrigerate 4 hours.",
+      "Dust with cocoa before serving."
+    ],
+    "rating": 4.9,
+    "reviewCount": 421,
+    "yield": "8 Servings"
+  },
+  {
     "id": "123e4567-e89b-12d3-a456-426614174001",
     "name": "Spicy Margarita",
     "authorName": "Sam Sifton",
@@ -43,5 +384,35 @@
     "rating": 4.5,
     "reviewCount": 85,
     "yield": "1 Drink"
+  },
+
+  {
+    "id": "e23e4567-e89b-12d3-a456-426614174014",
+    "name": "Chicken Tikka Masala",
+    "authorName": "Madhur Jaffrey",
+    "cookTimeMinutes": 40,
+    "videoURLString": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "thumbnailURLString": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    "ingredients": [
+      "1.5 lb Chicken Breast, cubed",
+      "1 cup Yogurt",
+      "2 tbsp Garam Masala",
+      "1 tbsp Ginger-Garlic Paste",
+      "1 can (14 oz) Tomato Sauce",
+      "1 cup Heavy Cream",
+      "2 tbsp Butter",
+      "Cilantro"
+    ],
+    "steps": [
+      "Marinate chicken in yogurt, garam masala, and ginger-garlic paste for 2 hours.",
+      "Grill or broil chicken until charred.",
+      "Simmer tomato sauce with butter and spices.",
+      "Add grilled chicken and cream.",
+      "Simmer 10 minutes until thick.",
+      "Garnish with cilantro and serve with naan."
+    ],
+    "rating": 4.8,
+    "reviewCount": 356,
+    "yield": "4 Servings"
   }
 ]
