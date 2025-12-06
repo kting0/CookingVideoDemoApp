@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVKit
 
 /// Full-screen recipe detail view with hero image, metadata, ingredients, and cooking steps.
 ///
@@ -26,8 +27,13 @@ struct RecipeDetailView: View {
     
     // MARK: - Properties
     
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\._wasVideoPlaying) private var wasVideoPlaying
+    
     let recipe: Recipe
     @Binding var isSaved: Bool
+    
+    @State private var shouldResumePlaybackOnClose: Bool = false
     
     // MARK: - Body
     
@@ -56,10 +62,22 @@ struct RecipeDetailView: View {
                 .padding(.bottom, 40)
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                bookmarkButton
+                    // Bookmark button
+                    bookmarkButton
+            }
+        }
+        .onAppear {
+            // Capture whether the video was playing when the sheet opened
+            shouldResumePlaybackOnClose = wasVideoPlaying
+            // Optionally pause immediately when opening the detail
+            NotificationCenter.default.post(name: .recipeDetailPauseVideoRequested, object: nil)
+        }
+        .onDisappear {
+            // If it was playing before, ask to resume when the sheet goes away
+            if shouldResumePlaybackOnClose {
+                NotificationCenter.default.post(name: .recipeDetailResumeVideoRequested, object: nil)
             }
         }
     }
@@ -351,3 +369,17 @@ struct RecipeDetailView: View {
     }
 }
 
+// MARK: - Video Playback Coordination
+private struct WasVideoPlayingKey: EnvironmentKey {
+    static let defaultValue: Bool = false
+}
+extension EnvironmentValues {
+    var _wasVideoPlaying: Bool {
+        get { self[WasVideoPlayingKey.self] }
+        set { self[WasVideoPlayingKey.self] = newValue }
+    }
+}
+extension Notification.Name {
+    static let recipeDetailPauseVideoRequested = Notification.Name("recipeDetailPauseVideoRequested")
+    static let recipeDetailResumeVideoRequested = Notification.Name("recipeDetailResumeVideoRequested")
+}
