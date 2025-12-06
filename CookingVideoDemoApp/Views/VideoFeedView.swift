@@ -91,15 +91,9 @@ struct VideoFeedView: View {
     // MARK: - Loading View
     
     private var loadingView: some View {
-        VStack(spacing: 20) {
-            ProgressView()
-                .scaleEffect(1.5)
-            Text("Loading Recipes...")
-                .font(.headline)
-                .foregroundStyle(.white)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black)
+        ShimmerView()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black)
     }
     
     // MARK: - Error View
