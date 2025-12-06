@@ -494,6 +494,11 @@ struct VideoPageView: View {
         // Setup player
         playerViewModel?.setupPlayer()
         
+        // Preemptively pause any other playing videos before we start (exclusive playback)
+        if let vm = playerViewModel {
+            NotificationCenter.default.post(name: .playerWillStartExclusivePlayback, object: vm)
+        }
+        
         // Auto-play with debounce
         playerViewModel?.play(afterDelay: autoplayDebounce)
         // Sync sheet state when appearing
@@ -556,6 +561,9 @@ struct VideoPageView: View {
             playerViewModel?.pause()
         } else if !shouldShowSheet && isRecipeSheetVisible {
             if wasPlayingBeforeRecipeSheet {
+                if let vm = playerViewModel {
+                    NotificationCenter.default.post(name: .playerWillStartExclusivePlayback, object: vm)
+                }
                 playerViewModel?.play(afterDelay: autoplayDebounce)
             }
             wasPlayingBeforeRecipeSheet = false
@@ -574,6 +582,9 @@ struct VideoPageView: View {
         if let videoURL = recipe.videoURL {
             playerViewModel = PlayerViewModel(videoURL: videoURL)
             playerViewModel?.setupPlayer()
+            if let vm = playerViewModel {
+                NotificationCenter.default.post(name: .playerWillStartExclusivePlayback, object: vm)
+            }
             playerViewModel?.play(afterDelay: autoplayDebounce)
         }
     }

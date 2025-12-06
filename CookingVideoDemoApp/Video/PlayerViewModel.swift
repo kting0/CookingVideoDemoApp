@@ -9,6 +9,11 @@ import AVFoundation
 import SwiftUI
 import Observation
 
+extension Notification.Name {
+    /// Posted when any PlayerViewModel is about to start playing. Object is the PlayerViewModel starting playback.
+    static let playerWillStartExclusivePlayback = Notification.Name("playerWillStartExclusivePlayback")
+}
+
 /// ViewModel managing a single AVPlayer instance with explicit lifecycle control.
 ///
 /// Key Responsibilities:
@@ -74,6 +79,10 @@ final class PlayerViewModel {
     
     /// Track if we've been explicitly cleaned up
     private var isCleanedUp = false
+
+    /// Notification tokens for cleanup
+    private var endObserverToken: NSObjectProtocol?
+    private var exclusivePlaybackObserverToken: NSObjectProtocol?
     
     // MARK: - Initialization
     
@@ -128,14 +137,26 @@ final class PlayerViewModel {
             }
         }
         
-        // Observe when video finishes
-        NotificationCenter.default.addObserver(
+        endObserverToken = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: item,
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.handleVideoEnd()
+            }
+        }
+        
+        // Observe exclusive playback notifications to pause when another player starts
+        exclusivePlaybackObserverToken = NotificationCenter.default.addObserver(
+            forName: .playerWillStartExclusivePlayback,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            // If another PlayerViewModel (not self) is starting, pause this one
+            if let starter = notification.object as? PlayerViewModel, starter !== self {
+                self.pause()
             }
         }
     }
@@ -154,6 +175,9 @@ final class PlayerViewModel {
         } else {
             // Update audio session when starting playback
             updateAudioSession()
+            
+            // Enforce exclusive playback: notify others to pause
+            NotificationCenter.default.post(name: .playerWillStartExclusivePlayback, object: self)
             
             player.play()
             isPlaying = true
@@ -215,6 +239,15 @@ final class PlayerViewModel {
         // Remove observers
         statusObservation?.invalidate()
         statusObservation = nil
+        
+        if let token = endObserverToken {
+            NotificationCenter.default.removeObserver(token)
+            endObserverToken = nil
+        }
+        if let token = exclusivePlaybackObserverToken {
+            NotificationCenter.default.removeObserver(token)
+            exclusivePlaybackObserverToken = nil
+        }
         
         NotificationCenter.default.removeObserver(self)
         
