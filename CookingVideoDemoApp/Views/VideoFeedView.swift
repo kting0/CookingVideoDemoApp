@@ -42,21 +42,24 @@ struct VideoFeedView: View {
                 } else {
                     feedScrollView
                 }
+                if let recipe = showingDetailForRecipe {
+                    RecipeDetailSheet(
+                        recipe: recipe,
+                        isSaved: Binding(
+                            get: { savedRecipesStore.isSaved(recipe.id) },
+                            set: { _ in savedRecipesStore.toggleSaved(recipe.id) }
+                        ),
+                        onDismiss: dismissRecipeSheet
+                    )
+                    .transition(.move(edge: .trailing))
+                    .zIndex(1)
+                }
             }
             .ignoresSafeArea()
             .task {
                 await viewModel.loadRecipes()
             }
-            // Recipe detail navigation
-            .navigationDestination(item: $showingDetailForRecipe) { recipe in
-                RecipeDetailView(
-                    recipe: recipe,
-                    isSaved: Binding(
-                        get: { savedRecipesStore.isSaved(recipe.id) },
-                        set: { _ in savedRecipesStore.toggleSaved(recipe.id) }
-                    )
-                )
-            }
+            .animation(.spring(response: 0.35, dampingFraction: 0.9), value: showingDetailForRecipe)
         }
     }
     
@@ -73,8 +76,11 @@ struct VideoFeedView: View {
                             savedRecipesStore.toggleSaved(recipe.id)
                         },
                         onGoToRecipe: {
-                            showingDetailForRecipe = recipe
-                        }
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+                                showingDetailForRecipe = recipe
+                            }
+                        },
+                        presentedRecipe: $showingDetailForRecipe
                     )
                     .containerRelativeFrame([.horizontal, .vertical])
                     .onAppear {
@@ -158,6 +164,60 @@ struct VideoFeedView: View {
     private func handlePageAppear(index: Int) {
         currentPageIndex = index
         print("📄 Current page: \(index)")
+    }
+    /// Dismiss the recipe sheet with animation and reset drag state
+    private func dismissRecipeSheet() {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+            showingDetailForRecipe = nil
+        }
+    }
+}
+
+// MARK: - Recipe Detail Sheet
+
+private struct RecipeDetailSheet: View {
+    
+    let recipe: Recipe
+    @Binding var isSaved: Bool
+    let onDismiss: () -> Void
+    
+    @GestureState private var dragOffset: CGFloat = 0
+    
+    var body: some View {
+        ZStack(alignment: .leading) {
+            Color.black.opacity(0.45)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    onDismiss()
+                }
+            
+            NavigationStack {
+                RecipeDetailView(recipe: recipe, isSaved: $isSaved)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button(action: onDismiss) {
+                                Label("Back", systemImage: "chevron.left")
+                                    .labelStyle(.titleAndIcon)
+                            }
+                        }
+                    }
+            }
+            .background(Color(.systemBackground))
+            .offset(x: max(0, dragOffset))
+            .gesture(
+                DragGesture()
+                    .updating($dragOffset) { value, state, _ in
+                        state = max(0, value.translation.width)
+                    }
+                    .onEnded { value in
+                        if value.translation.width > 120 {
+                            onDismiss()
+                        }
+                    }
+            )
+            .transition(.move(edge: .trailing))
+            .shadow(color: .black.opacity(0.25), radius: 12, x: -4, y: 0)
+        }
     }
 }
 

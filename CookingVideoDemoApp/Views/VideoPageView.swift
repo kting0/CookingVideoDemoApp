@@ -33,6 +33,7 @@ struct VideoPageView: View {
     let isSaved: Bool
     let onToggleBookmark: () -> Void
     let onGoToRecipe: () -> Void
+    @Binding var presentedRecipe: Recipe?
     
     /// Player view model (created once per page)
     @State private var playerViewModel: PlayerViewModel?
@@ -57,6 +58,12 @@ struct VideoPageView: View {
     
     /// Debounce time for auto-play
     private let autoplayDebounce: TimeInterval = 0.2
+    
+    /// Track if recipe sheet is currently visible for this page
+    @State private var isRecipeSheetVisible = false
+    
+    /// Track playback state before opening recipe sheet
+    @State private var wasPlayingBeforeRecipeSheet = false
     
     // MARK: - Body
     
@@ -106,6 +113,9 @@ struct VideoPageView: View {
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             handleScenePhaseChange(from: oldPhase, to: newPhase)
+        }
+        .onChange(of: presentedRecipe?.id) { _, _ in
+            handleRecipeSheetChange()
         }
     }
     
@@ -483,12 +493,18 @@ struct VideoPageView: View {
         
         // Auto-play with debounce
         playerViewModel?.play(afterDelay: autoplayDebounce)
+        // Sync sheet state when appearing
+        handleRecipeSheetChange()
     }
     
     private func handleDisappear() {
         print("🎬 VideoPageView disappeared: \(recipe.name)")
         isActive = false
         
+        // Reset sheet tracking
+        isRecipeSheetVisible = false
+        wasPlayingBeforeRecipeSheet = false
+
         // Reset ingredients view
         showingIngredients = false
         
@@ -527,6 +543,24 @@ struct VideoPageView: View {
         }
     }
     
+    private func handleRecipeSheetChange() {
+        guard isActive else { return }
+        
+        let shouldShowSheet = presentedRecipe?.id == recipe.id
+        
+        if shouldShowSheet && !isRecipeSheetVisible {
+            wasPlayingBeforeRecipeSheet = playerViewModel?.isPlaying ?? false
+            playerViewModel?.pause()
+        } else if !shouldShowSheet && isRecipeSheetVisible {
+            if wasPlayingBeforeRecipeSheet {
+                playerViewModel?.play(afterDelay: autoplayDebounce)
+            }
+            wasPlayingBeforeRecipeSheet = false
+        }
+        
+        isRecipeSheetVisible = shouldShowSheet
+    }
+    
     private func retryVideoLoad() {
         print("🔄 Retrying video load for: \(recipe.name)")
         
@@ -561,6 +595,7 @@ struct VideoPageView: View {
         ),
         isSaved: false,
         onToggleBookmark: {},
-        onGoToRecipe: {}
+        onGoToRecipe: {},
+        presentedRecipe: .constant(nil)
     )
 }
