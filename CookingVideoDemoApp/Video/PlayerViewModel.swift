@@ -347,7 +347,7 @@ final class PlayerViewModel {
     
     /// Update audio session based on current state
     private func updateAudioSession() {
-        guard !isMuted, isPlaying else { return }
+        guard !isMuted else { return }
         
         do {
             let audioSession = AVAudioSession.sharedInstance()
